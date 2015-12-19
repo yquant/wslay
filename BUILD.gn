@@ -103,7 +103,7 @@ if (!is_win) {
   
   executable("wslay-fork-echoserv") {
     sources = [
-      "examples/fork-echoserv.cc",
+      "examples/fork-echoserv.c",
     ]
 
     libs = [ "nettle" ]
