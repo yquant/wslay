@@ -33,6 +33,13 @@ extern "C" {
 #include <stdlib.h>
 #include <sys/types.h>
 
+#ifdef _WINDOWS
+#if !defined(_SSIZE_T_) && !defined(_SSIZE_T_DEFINED)
+typedef intptr_t ssize_t;
+# define _SSIZE_T_
+# define _SSIZE_T_DEFINED
+#endif
+#endif
 
 /*
  * wslay/wslayver.h is generated from wslay/wslayver.h.in by

@@ -1,0 +1,127 @@
+# Copyright (c) 2015 yquant.com. All rights reserved.
+# Use of this source code is governed by LGPL with static linking exception
+# that can be found in the LICENSE file.
+
+wslay_sources = [
+  "lib/includes/wslay/wslay.h",
+  "lib/includes/wslay/wslayver.h",
+  "lib/config.h",
+  "lib/wslay_event.h",
+  "lib/wslay_frame.h",
+  "lib/wslay_net.h",
+  "lib/wslay_queue.h",
+  "lib/wslay_stack.h",
+  "lib/wslay_event.c",
+  "lib/wslay_frame.c",
+  "lib/wslay_net.c",
+  "lib/wslay_queue.c",
+  "lib/wslay_stack.c",
+]
+
+config("wslay_public_config") {
+  include_dirs = [ "lib/includes" ]
+}
+
+config("disable_warnings_config") {
+  if (is_win) {
+    cflags = [
+      "/wd4456",
+      "/wd4706",
+    ]
+  }
+}
+
+config("wslay_config") {
+  defines = [ "HAVE_CONFIG_H=1" ]
+
+  include_dirs = [ "lib" ]
+
+  if (!is_win) {
+    cflags = [
+      "-std=c99",
+      "-Wall",
+      "-Wextra",
+      "-Werror",
+      "-pedantic-errors",
+      "-Wno-long-long",
+    ]
+  }
+}
+
+static_library("wslay_static") {
+  sources = wslay_sources
+  
+  configs += [
+    ":wslay_config",
+    ":disable_warnings_config",
+  ]
+
+  public_configs = [
+    ":wslay_public_config",
+  ]
+}
+
+shared_library("wslay_shared") {
+  sources = wslay_sources
+  
+  sources += [
+    "lib/wslay.def",
+  ]
+  
+  output_name = "wslay"
+
+  if (!is_win) {
+    cflags = [ "-fPIC" ]
+    
+    configs -= [
+      "//build/config/gcc:symbol_visibility_hidden",
+    ]
+  }
+  
+  configs += [
+    ":wslay_config",
+    ":disable_warnings_config",
+  ]
+
+  public_configs = [
+    ":wslay_public_config",
+  ]
+}
+
+if (!is_win) {
+  executable("wslay-echoserv") {
+    sources = [
+      "examples/echoserv.cc",
+    ]
+
+    libs = [ "nettle" ]
+    
+    deps = [
+      ":wslay_static"
+    ]
+  }
+  
+  executable("wslay-fork-echoserv") {
+    sources = [
+      "examples/fork-echoserv.cc",
+    ]
+
+    libs = [ "nettle" ]
+    
+    deps = [
+      ":wslay_static"
+    ]
+  }
+  
+  executable("wslay-testclient") {
+    sources = [
+      "examples/testclient.cc",
+    ]
+
+    libs = [ "nettle" ]
+    
+    deps = [
+      ":wslay_static"
+    ]
+  }
+}
